@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --srams-bg: #0b0e13;
+}
+
+body {
+  background: var(--srams-bg);
+}
+
+.btn-hero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 1.05rem;
+  border-radius: 9999px;
+  background: linear-gradient(
+    135deg,
+    rgba(6, 182, 212, 0.18),
+    rgba(245, 158, 11, 0.14)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.theme-light .btn-hero {
+  background: linear-gradient(
+    135deg,
+    rgba(6, 182, 212, 0.18),
+    rgba(245, 158, 11, 0.14)
+  );
+  color: rgba(9, 12, 18, 0.92);
+  border-color: rgba(11, 14, 19, 0.16);
+}
