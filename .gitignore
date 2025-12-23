@@ -49,3 +49,4 @@ dist-ssr
 Thumbs.db
 .nx/cache
 .env.*
+.env
