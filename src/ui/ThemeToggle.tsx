@@ -1,31 +1,27 @@
 import { useEffect } from "react";
-import { useLocalStorage, useToggle } from "../hooks";
+import { useLocalStorage } from "../hooks";
 
 type Theme = "dark" | "light";
 
 export default function ThemeToggle() {
-  const [storedTheme, setStoredTheme] = useLocalStorage<Theme>(
-    "srams_theme",
-    "dark"
-  );
-  const [isLight, toggle] = useToggle(storedTheme === "light");
+  const [theme, setTheme] = useLocalStorage<Theme>("srams_theme", "dark");
 
   useEffect(() => {
-    const theme: Theme = isLight ? "light" : "dark";
-    setStoredTheme(theme);
+    const root = document.documentElement;
 
-    document.documentElement.classList.toggle("light", theme === "light");
-    document.documentElement.classList.toggle("dark", theme === "dark");
-  }, [isLight, setStoredTheme]);
+    root.classList.toggle("light", theme === "light");
+    root.classList.toggle("dark", theme === "dark");
+  }, [theme]);
 
   return (
     <button
       type="button"
-      className="btn-ghost text-sm px-3 py-2"
-      onClick={toggle}
+      className="btn-ghost text-sm"
+      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
       aria-label="Toggle light/dark theme"
+      aria-pressed={theme === "light"}
     >
-      {isLight ? "Light" : "Dark"}
+      {theme === "light" ? "Light" : "Dark"}
     </button>
   );
 }

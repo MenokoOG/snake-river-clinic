@@ -1,6 +1,6 @@
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/firestore";
-import { useAsync } from "../hooks";
+import { useAsync } from ".";
 import { pageSchemas } from "../data/pageSchemas";
 import { auth } from "../firebase/auth";
 
