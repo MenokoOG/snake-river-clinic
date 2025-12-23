@@ -12,9 +12,10 @@ import {
   createUserWithEmailAndPassword,
   updateProfile,
   signOut,
+  signInWithPopup,
 } from "firebase/auth";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
-import { getAuth } from "../firebase/auth";
+import { auth, googleProvider } from "../firebase/auth";
 import { db } from "../firebase/firestore";
 import type { AppRole, UserProfile } from "./types";
 
@@ -24,6 +25,7 @@ type AuthContextValue = {
   role: AppRole | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   signup: (args: {
     email: string;
     password: string;
@@ -58,14 +60,9 @@ async function ensureUserProfile(u: User): Promise<UserProfile> {
     createdAt: Date.now(),
   };
 
-  // create doc (client timestamp ok; serverTimestamp for future auditing if needed)
   await setDoc(
     ref,
-    {
-      ...profile,
-      createdAt: profile.createdAt,
-      createdAtServer: serverTimestamp(),
-    },
+    { ...profile, createdAtServer: serverTimestamp() },
     { merge: true }
   );
 
@@ -78,8 +75,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(getAuth(), async (u) => {
+    const unsub = onAuthStateChanged(auth, async (u) => {
       setUser(u);
+
       if (!u) {
         setProfile(null);
         setLoading(false);
@@ -89,18 +87,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const p = await ensureUserProfile(u);
         setProfile(p);
-      } catch (e) {
-        // If profile fetch fails, keep auth user but no role.
+      } catch {
+        // If Firestore is locked down, auth can still succeed.
+        // Profile/role will be null until rules are fixed.
         setProfile(null);
       } finally {
         setLoading(false);
       }
     });
+
     return () => unsub();
   }, []);
 
   const login = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(getAuth(), email.trim(), password);
+    await signInWithEmailAndPassword(auth, email.trim(), password);
+  };
+
+  const loginWithGoogle = async () => {
+    await signInWithPopup(auth, googleProvider);
+    // profile creation will occur via onAuthStateChanged -> ensureUserProfile
   };
 
   const signup = async (args: {
@@ -110,24 +115,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }) => {
     const email = args.email.trim();
     const password = args.password;
-
-    const cred = await createUserWithEmailAndPassword(
-      getAuth(),
-      email,
-      password
-    );
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
 
     if (args.displayName?.trim()) {
       await updateProfile(cred.user, { displayName: args.displayName.trim() });
     }
 
-    // ensure Firestore user profile exists and is role=user by default
-    const p = await ensureUserProfile(cred.user);
-    setProfile(p);
+    try {
+      const p = await ensureUserProfile(cred.user);
+      setProfile(p);
+    } catch {
+      setProfile(null);
+    }
   };
 
   const logout = async () => {
-    await signOut(getAuth());
+    await signOut(auth);
   };
 
   const value = useMemo<AuthContextValue>(
@@ -137,6 +140,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       role: profile?.role ?? null,
       loading,
       login,
+      loginWithGoogle,
       signup,
       logout,
     }),
