@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 
 <head>
     <meta charset="UTF-8" />
@@ -8,6 +8,8 @@
     <title>Snake River Adult Medicine | Primary Care in Clarkston, WA</title>
     <meta name="description"
         content="Snake River Adult Medicine provides primary care in Clarkston, WA. Respectful, human-centered care focused on adult medicine and long-term health." />
+
+    <!-- This will be updated at runtime by ThemeToggle, but keep a safe default -->
     <meta name="theme-color" content="#0B0E13" />
 
     <!-- Canonical (update domain after Netlify deploy) -->
@@ -26,7 +28,9 @@
     <meta name="twitter:description" content="Respectful, human-centered primary care in Clarkston, WA." />
 </head>
 
-<body class="bg-ink-950 text-white">
+<!-- IMPORTANT: no Tailwind bg/text classes here. Theme is driven by CSS variables. -->
+
+<body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
 </body>

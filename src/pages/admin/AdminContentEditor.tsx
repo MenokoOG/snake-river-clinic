@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { pageSchemas } from "../../data/pageSchemas";
-import { usePageContent } from "../../hooks/usePageContent";
+import { usePageContent } from "../../hooks/index";
 import {
   useLocalStorage,
   useStateWithHistory,

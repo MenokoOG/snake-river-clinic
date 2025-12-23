@@ -3,244 +3,238 @@
 @tailwind utilities;
 
 /* =========================================================
-   Accessible Theme Tokens (Dark + Light)
-   - Uses CSS variables for consistent, readable UI
-   - Works with Tailwind + custom utility classes
+   THEME SYSTEM (single source of truth)
+   <html data-theme="dark"> or <html data-theme="light">
    ========================================================= */
 
 :root {
-  /* Let the browser know we support both; we still set explicit tokens below */
-  color-scheme: dark;
-
-  /* Typography & spacing */
-  --radius: 1rem;
-  --radius-sm: 0.75rem;
-  --ring: 0 0 0 3px rgba(59, 130, 246, 0.35); /* blue focus ring */
-
-  /* Dark theme (default) */
+  /* Default (dark) */
   --bg: #0b0e13;
+  --bg2: #070a0f;
   --panel: rgba(255, 255, 255, 0.06);
-  --panel-2: rgba(255, 255, 255, 0.09);
+  --panel2: rgba(255, 255, 255, 0.09);
+  --text: rgba(255, 255, 255, 0.92);
+  --muted: rgba(255, 255, 255, 0.72);
+  --muted2: rgba(255, 255, 255, 0.58);
   --border: rgba(255, 255, 255, 0.14);
 
-  --text: rgba(255, 255, 255, 0.92);
-  --muted: rgba(255, 255, 255, 0.7);
-  --muted-2: rgba(255, 255, 255, 0.58);
+  --ring: rgba(255, 255, 255, 0.55);
 
-  --input-bg: rgba(255, 255, 255, 0.06);
-  --input-border: rgba(255, 255, 255, 0.18);
-  --placeholder: rgba(255, 255, 255, 0.55);
-
-  /* Brand accent (kept calm + accessible) */
-  --accent: #22c55e; /* green */
-  --accent-2: #3b82f6; /* blue */
-  --warning: #f59e0b; /* amber */
+  /* Accent system (accessible) */
+  --primary: #22c55e; /* green */
+  --primary2: #06b6d4; /* cyan */
+  --warn: #f59e0b; /* amber */
   --danger: #ef4444; /* red */
 
-  /* Button */
-  --btn-bg: rgba(255, 255, 255, 0.08);
-  --btn-bg-hover: rgba(255, 255, 255, 0.12);
-  --btn-border: rgba(255, 255, 255, 0.16);
+  /* Background image control */
+  --bg-image: none; /* set per theme below */
+  --bg-overlay: linear-gradient(
+    180deg,
+    rgba(11, 14, 19, 0.88),
+    rgba(11, 14, 19, 0.92)
+  );
 }
 
-/* Light theme tokens */
-html.light {
-  color-scheme: light;
-
+/* Light theme variables */
+html[data-theme="light"] {
   --bg: #f7f8fb;
-  --panel: rgba(15, 23, 42, 0.04);
-  --panel-2: rgba(15, 23, 42, 0.07);
-  --border: rgba(15, 23, 42, 0.14);
-
+  --bg2: #eef1f7;
+  --panel: rgba(10, 12, 18, 0.06);
+  --panel2: rgba(10, 12, 18, 0.08);
   --text: rgba(9, 12, 18, 0.92);
   --muted: rgba(9, 12, 18, 0.72);
-  --muted-2: rgba(9, 12, 18, 0.58);
+  --muted2: rgba(9, 12, 18, 0.58);
+  --border: rgba(10, 12, 18, 0.14);
 
-  --input-bg: rgba(255, 255, 255, 1);
-  --input-border: rgba(15, 23, 42, 0.18);
-  --placeholder: rgba(15, 23, 42, 0.48);
+  --ring: rgba(10, 12, 18, 0.55);
 
-  --btn-bg: rgba(15, 23, 42, 0.06);
-  --btn-bg-hover: rgba(15, 23, 42, 0.1);
-  --btn-border: rgba(15, 23, 42, 0.16);
+  --primary: #16a34a;
+  --primary2: #0891b2;
+  --warn: #b45309;
+  --danger: #dc2626;
 
-  --ring: 0 0 0 3px rgba(37, 99, 235, 0.25);
+  --bg-overlay: linear-gradient(
+    180deg,
+    rgba(247, 248, 251, 0.78),
+    rgba(247, 248, 251, 0.92)
+  );
+}
+
+/* =========================================================
+   PAGE BACKGROUND (with optional image)
+   Put your images in /public/backgrounds/
+   Example paths used below:
+     /backgrounds/srams-dark.webp
+     /backgrounds/srams-light.webp
+   ========================================================= */
+
+html[data-theme="dark"] {
+  --bg-image: url("/backgrounds/srams-dark.webp");
+}
+
+html[data-theme="light"] {
+  --bg-image: url("/backgrounds/srams-light.webp");
 }
 
 body {
   background: var(--bg);
   color: var(--text);
+  min-height: 100vh;
+}
+
+/* Background image layer with overlay to preserve readability */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-image: var(--bg-overlay), var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Subtle vignette for contrast */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(
+    1200px 800px at 30% 10%,
+    rgba(6, 182, 212, 0.1),
+    transparent 60%
+  );
+  pointer-events: none;
 }
 
 /* =========================================================
-   Component Classes
+   GLOBAL UI PRIMITIVES
    ========================================================= */
 
-@layer components {
-  /* Inputs */
-  .input {
-    width: 100%;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--input-border);
-    background: var(--input-bg);
-    color: var(--text);
+.card {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  border-radius: 1.25rem;
+}
 
-    /* Big, readable tap targets */
-    padding: 0.85rem 0.95rem;
-    font-size: 1rem;
-    line-height: 1.4;
+.btn-hero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.05rem;
+  border-radius: 9999px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--primary2) 20%, transparent),
+    color-mix(in srgb, var(--warn) 16%, transparent)
+  );
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
 
-    /* Fix placeholder overflow + ensure text stays inside */
-    box-sizing: border-box;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+.btn-hero:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
-  .input::placeholder {
-    color: var(--placeholder);
-    opacity: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 0.95rem;
+  border-radius: 0.9rem;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--panel) 55%, transparent);
+  color: var(--text);
+}
 
-  textarea.input {
-    min-height: 9rem;
-    resize: vertical;
-    white-space: pre-wrap;
-  }
+.btn-ghost:hover {
+  background: color-mix(in srgb, var(--panel2) 70%, transparent);
+}
 
-  .input:focus {
-    outline: none;
-    box-shadow: var(--ring);
-    border-color: rgba(59, 130, 246, 0.45);
-  }
+.btn-ghost:focus-visible,
+.btn-hero:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ring);
+}
 
-  /* Buttons */
-  .btn-hero {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
+/* Inputs: large, readable, accessible */
+.input {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--panel) 70%, transparent);
+  color: var(--text);
+  padding: 0.85rem 0.95rem;
+  font-size: 1rem;
+  line-height: 1.4;
+}
 
-    padding: 0.85rem 1.05rem;
-    border-radius: 9999px;
+.input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ring);
+  border-color: color-mix(in srgb, var(--primary2) 35%, var(--border));
+}
 
-    background: linear-gradient(
-      135deg,
-      rgba(59, 130, 246, 0.18),
-      rgba(34, 197, 94, 0.14)
-    );
+/* Placeholder fix: never overflow, better contrast */
+.input::placeholder {
+  color: var(--muted2);
+  opacity: 1;
+}
 
-    border: 1px solid var(--btn-border);
-    color: var(--text);
-    font-weight: 650;
-    letter-spacing: 0.01em;
-  }
+/* Textareas should not shrink readability */
+textarea.input {
+  resize: vertical;
+  min-height: 8rem;
+}
 
-  .btn-hero:hover {
-    filter: brightness(1.03);
-  }
+/* Pills/dots for calendar status */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--panel) 60%, transparent);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
 
-  .btn-hero:focus {
-    outline: none;
-    box-shadow: var(--ring);
-  }
+.dot {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 9999px;
+  display: inline-block;
+}
 
-  .btn-hero:disabled,
-  .btn-hero[aria-disabled="true"] {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
+.dot--approved {
+  background: color-mix(in srgb, var(--primary) 85%, transparent);
+}
+.dot--requested {
+  background: color-mix(in srgb, var(--warn) 85%, transparent);
+}
+.dot--rejected {
+  background: color-mix(in srgb, var(--warn) 85%, transparent);
+}
+.dot--canceled {
+  background: color-mix(in srgb, var(--danger) 85%, transparent);
+}
 
-  .btn-ghost {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 0.7rem 0.95rem;
-    border-radius: 0.9rem;
-
-    border: 1px solid var(--btn-border);
-    background: var(--btn-bg);
-    color: var(--text);
-    font-weight: 600;
-  }
-
-  .btn-ghost:hover {
-    background: var(--btn-bg-hover);
-  }
-
-  .btn-ghost:focus {
-    outline: none;
-    box-shadow: var(--ring);
-  }
-
-  /* Layout surfaces */
-  .card {
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    background: var(--panel);
-  }
-
-  .card-2 {
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    background: var(--panel-2);
-  }
-
-  /* Status pills */
-  .pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    border-radius: 9999px;
-    padding: 0.25rem 0.65rem;
-    font-size: 0.875rem;
-    border: 1px solid var(--border);
-    background: var(--panel);
-    color: var(--text);
-    white-space: nowrap;
-  }
-
-  .pill--approved {
-    border-color: rgba(34, 197, 94, 0.35);
-    background: rgba(34, 197, 94, 0.12);
-  }
-
-  .pill--rejected {
-    border-color: rgba(245, 158, 11, 0.4);
-    background: rgba(245, 158, 11, 0.14);
-  }
-
-  .pill--canceled {
-    border-color: rgba(239, 68, 68, 0.4);
-    background: rgba(239, 68, 68, 0.14);
-  }
-
-  .pill--pending {
-    border-color: rgba(59, 130, 246, 0.35);
-    background: rgba(59, 130, 246, 0.12);
-  }
-
-  /* Calendar markers */
-  .dot {
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 9999px;
-    display: inline-block;
-  }
-
-  .dot--approved {
-    background: rgba(34, 197, 94, 0.95);
-  }
-  .dot--rejected {
-    background: rgba(245, 158, 11, 0.95);
-  }
-  .dot--canceled {
-    background: rgba(239, 68, 68, 0.95);
-  }
-  .dot--pending {
-    background: rgba(59, 130, 246, 0.95);
-  }
+.pill--approved {
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
+}
+.pill--requested {
+  border-color: color-mix(in srgb, var(--warn) 40%, var(--border));
+}
+.pill--rejected {
+  border-color: color-mix(in srgb, var(--warn) 40%, var(--border));
+}
+.pill--canceled {
+  border-color: color-mix(in srgb, var(--danger) 40%, var(--border));
 }
