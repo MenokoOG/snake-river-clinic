@@ -4,7 +4,8 @@ import Footer from "../ui/Footer";
 
 export default function SiteLayout() {
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    // IMPORTANT: remove hard-coded bg/text classes so CSS variables can drive theme
+    <div className="min-h-screen">
       <Header />
 
       <main className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-10">

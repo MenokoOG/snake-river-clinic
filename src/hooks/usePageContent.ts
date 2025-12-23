@@ -1,10 +1,10 @@
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/firestore";
-import { useAsync } from "../hooks";
+import { useAsync } from ".";
 import { pageSchemas } from "../data/pageSchemas";
 import { auth } from "../firebase/auth";
 
-export function usePageContent(pageId: string) {
+export default function usePageContent(pageId: string) {
   const ref = doc(db, "content", "pages", "pages", pageId);
 
   const { value, loading, error } = useAsync(async () => {

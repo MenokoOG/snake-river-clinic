@@ -1,31 +1,41 @@
 import { useAppointments } from "../../appointments/useAppointments";
 import Calendar from "../../calendar/Calendar";
 import usePageMeta from "../../seo/usePageMeta";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+
+function pillFor(status: string) {
+  if (status === "approved") return "pill pill--approved";
+  if (status === "rejected") return "pill pill--rejected";
+  if (status === "canceled") return "pill pill--canceled";
+  return "pill pill--pending";
+}
 
 export default function AdminAppointments() {
   usePageMeta({
     title: "Manage Appointments | Admin | Snake River Adult Medicine",
     description:
-      "Admin appointment management: review requests and approve or reject.",
+      "Admin appointment management: review requests and approve, reject, or cancel.",
     canonicalPath: "/admin/appointments",
   });
 
   const { appointments, loading, updateStatus } = useAppointments();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  if (loading) return <div className="p-8">Loading…</div>;
+  const list = useMemo(() => {
+    return selectedDate
+      ? appointments.filter((a) => a.date === selectedDate)
+      : appointments;
+  }, [appointments, selectedDate]);
 
-  const list = selectedDate
-    ? appointments.filter((a) => a.date === selectedDate)
-    : appointments;
+  if (loading) return <div className="p-8">Loading…</div>;
 
   return (
     <section className="space-y-6">
       <header className="space-y-2">
-        <h1 className="text-2xl font-semibold">Appointments</h1>
-        <p className="text-white/75 text-sm">
-          Select a day on the calendar to filter appointments.
+        <h1 className="text-3xl font-semibold">Appointments</h1>
+        <p className="text-[1.05rem]" style={{ color: "var(--muted)" }}>
+          Select a day on the calendar to filter appointments. Status colors are
+          shown on the calendar and in the list.
         </p>
       </header>
 
@@ -34,8 +44,8 @@ export default function AdminAppointments() {
         onSelect={(date) => setSelectedDate(date)}
       />
 
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h2 className="text-xl font-semibold">
           {selectedDate
             ? `Appointments for ${selectedDate}`
             : "All appointments"}
@@ -43,7 +53,7 @@ export default function AdminAppointments() {
 
         {selectedDate && (
           <button
-            className="btn-hero"
+            className="btn-ghost"
             type="button"
             onClick={() => setSelectedDate(null)}
           >
@@ -52,30 +62,27 @@ export default function AdminAppointments() {
         )}
       </div>
 
-      <div className="space-y-3" aria-live="polite">
+      <div className="space-y-4" aria-live="polite">
         {list.length === 0 && (
-          <div className="border border-white/10 bg-white/5 rounded-xl p-4">
-            No appointments found.
-          </div>
+          <div className="card p-5">No appointments found.</div>
         )}
 
         {list.map((a) => (
-          <div
-            key={a.id}
-            className="border border-white/10 bg-white/5 p-4 rounded-xl"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="font-semibold">{a.patientName}</div>
-                <div className="text-sm opacity-80">
+          <div key={a.id} className="card p-5 sm:p-6">
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+              <div className="space-y-1">
+                <div className="text-lg font-semibold">{a.patientName}</div>
+
+                <div className="text-sm" style={{ color: "var(--muted)" }}>
                   {a.date} @ {a.time}
                 </div>
-                <div className="text-xs opacity-70 mt-1">
-                  Status: <span className="font-medium">{a.status}</span>
+
+                <div className={pillFor(a.status)}>
+                  Status: <span className="font-semibold">{a.status}</span>
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   className="btn-hero"
                   type="button"
@@ -83,12 +90,27 @@ export default function AdminAppointments() {
                 >
                   Approve
                 </button>
+
                 <button
-                  className="btn-hero"
+                  className="btn-ghost"
                   type="button"
                   onClick={() => updateStatus(a.id!, "rejected")}
+                  style={{
+                    borderColor: "rgba(245,158,11,0.35)",
+                  }}
                 >
                   Reject
+                </button>
+
+                <button
+                  className="btn-ghost"
+                  type="button"
+                  onClick={() => updateStatus(a.id!, "canceled")}
+                  style={{
+                    borderColor: "rgba(239,68,68,0.35)",
+                  }}
+                >
+                  Cancel
                 </button>
               </div>
             </div>

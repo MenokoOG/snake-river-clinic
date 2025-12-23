@@ -1,5 +1,5 @@
 import { useAuth } from "../../auth/AuthContext";
-import { usePageContent } from "../../cms/usePageContent";
+import { usePageContent } from "../../hooks/index";
 import EditableBlock from "../../cms/EditableBlock";
 
 export default function Home() {
