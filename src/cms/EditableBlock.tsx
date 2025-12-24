@@ -24,6 +24,7 @@ export default function EditableBlock({ value, onSave, isAdmin }: Props) {
           />
           <div className="flex gap-2">
             <button
+              type="button"
               className="btn-hero"
               onClick={() => {
                 onSave(draft);
@@ -32,7 +33,7 @@ export default function EditableBlock({ value, onSave, isAdmin }: Props) {
             >
               Save
             </button>
-            <button className="btn-hero" onClick={toggle}>
+            <button type="button" className="btn-hero" onClick={toggle}>
               Cancel
             </button>
           </div>

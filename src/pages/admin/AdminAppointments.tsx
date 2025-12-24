@@ -2,12 +2,13 @@ import { useAppointments } from "../../appointments/useAppointments";
 import Calendar from "../../calendar/Calendar";
 import usePageMeta from "../../seo/usePageMeta";
 import { useMemo, useState } from "react";
+import type { AppointmentStatus } from "../../appointments/types";
 
-function pillFor(status: string) {
+function pillFor(status: AppointmentStatus) {
   if (status === "approved") return "pill pill--approved";
   if (status === "rejected") return "pill pill--rejected";
   if (status === "canceled") return "pill pill--canceled";
-  return "pill pill--pending";
+  return "pill pill--requested";
 }
 
 export default function AdminAppointments() {
@@ -96,7 +97,8 @@ export default function AdminAppointments() {
                   type="button"
                   onClick={() => updateStatus(a.id!, "rejected")}
                   style={{
-                    borderColor: "rgba(245,158,11,0.35)",
+                    borderColor:
+                      "color-mix(in srgb, var(--warn) 40%, var(--border))",
                   }}
                 >
                   Reject
@@ -107,7 +109,8 @@ export default function AdminAppointments() {
                   type="button"
                   onClick={() => updateStatus(a.id!, "canceled")}
                   style={{
-                    borderColor: "rgba(239,68,68,0.35)",
+                    borderColor:
+                      "color-mix(in srgb, var(--danger) 40%, var(--border))",
                   }}
                 >
                   Cancel

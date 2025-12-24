@@ -27,9 +27,9 @@ function statusPriority(s: AppointmentStatus): number {
 
 function dotClassFor(status: AppointmentStatus) {
   if (status === "approved") return "dot dot--approved";
+  if (status === "requested") return "dot dot--requested";
   if (status === "rejected") return "dot dot--rejected";
-  if (status === "canceled") return "dot dot--canceled";
-  return "dot dot--requested";
+  return "dot dot--canceled";
 }
 
 export default function Calendar({
@@ -87,21 +87,18 @@ export default function Calendar({
           <button
             className="btn-ghost text-sm"
             onClick={() => setCursor((c) => addMonths(c, -1))}
-            type="button"
           >
             Prev
           </button>
           <button
             className="btn-ghost text-sm"
             onClick={() => setCursor(() => new Date())}
-            type="button"
           >
             Today
           </button>
           <button
             className="btn-ghost text-sm"
             onClick={() => setCursor((c) => addMonths(c, 1))}
-            type="button"
           >
             Next
           </button>
