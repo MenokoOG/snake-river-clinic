@@ -4,10 +4,29 @@ import {
   getDocs,
   updateDoc,
   doc,
+  deleteDoc,
+  setDoc,
+  runTransaction,
+  query,
+  where,
+  getDoc,
 } from "firebase/firestore";
 import { db } from "../firebase/firestore";
-import type { Appointment } from "./types";
+import type { Appointment, ArchivedAppointment } from "./types";
 import { useAsync } from "../hooks";
+
+type Actor =
+  | { role: "admin"; uid?: string; email?: string }
+  | { role: "patient"; uid?: string; email: string }
+  | { role: "system"; uid?: string; email?: string };
+
+function toAppointmentDateTimeMs(a: Pick<Appointment, "date" | "time">) {
+  // date: YYYY-MM-DD, time: HH:mm
+  // Build a local Date — fine for MVP
+  const [y, m, d] = a.date.split("-").map(Number);
+  const [hh, mm] = a.time.split(":").map(Number);
+  return new Date(y, (m ?? 1) - 1, d ?? 1, hh ?? 0, mm ?? 0, 0, 0).getTime();
+}
 
 export function useAppointments() {
   const fetchAll = async () => {
@@ -33,11 +52,76 @@ export function useAppointments() {
     await execute();
   };
 
+  /**
+   * Archive + delete (transaction)
+   * - Writes full appointment into appointments_archive/{id}
+   * - Deletes appointments/{id}
+   * - Adds flags if deleted before scheduled date/time
+   */
+  const archiveAndDelete = async (id: string, actor: Actor) => {
+    const srcRef = doc(db, "appointments", id);
+    const dstRef = doc(db, "appointments_archive", id);
+
+    await runTransaction(db, async (tx) => {
+      const snap = await tx.get(srcRef);
+      if (!snap.exists()) {
+        throw new Error("Appointment not found (already deleted).");
+      }
+
+      const appt = { id: snap.id, ...(snap.data() as any) } as Appointment;
+      const now = Date.now();
+      const apptMs = toAppointmentDateTimeMs(appt);
+
+      const deletedBeforeAppointment = now < apptMs;
+      const deletedWhileApproved = appt.status === "approved";
+
+      const archive: ArchivedAppointment = {
+        ...appt,
+        archivedAt: now,
+        archivedBy: {
+          uid: actor.uid,
+          email: actor.email,
+          role: actor.role,
+        },
+        archiveReason:
+          actor.role === "admin"
+            ? "admin_deleted"
+            : actor.role === "patient"
+            ? "patient_deleted"
+            : "cleanup",
+        flags: {
+          deletedBeforeAppointment,
+          deletedWhileApproved,
+        },
+      };
+
+      tx.set(dstRef, archive);
+      tx.delete(srcRef);
+    });
+
+    await execute();
+  };
+
+  /**
+   * Patient view helper: fetch appointments by email
+   * (useful for portal)
+   */
+  const fetchByEmail = async (email: string) => {
+    const q = query(
+      collection(db, "appointments"),
+      where("patientEmail", "==", email)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() })) as Appointment[];
+  };
+
   return {
     appointments: value ?? [],
     loading,
     request,
     updateStatus,
+    archiveAndDelete,
+    fetchByEmail,
     refresh: execute,
   };
 }
