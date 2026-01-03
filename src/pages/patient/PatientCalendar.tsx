@@ -4,9 +4,6 @@ import usePageMeta from "../../seo/usePageMeta";
 function startOfMonth(d: Date) {
   return new Date(d.getFullYear(), d.getMonth(), 1);
 }
-function endOfMonth(d: Date) {
-  return new Date(d.getFullYear(), d.getMonth() + 1, 0);
-}
 function addMonths(d: Date, months: number) {
   return new Date(d.getFullYear(), d.getMonth() + months, 1);
 }
@@ -27,7 +24,6 @@ export default function PatientCalendar() {
 
   const { label, days } = useMemo(() => {
     const first = startOfMonth(cursor);
-    const last = endOfMonth(cursor);
 
     const monthLabel = first.toLocaleString(undefined, {
       month: "long",
@@ -50,10 +46,15 @@ export default function PatientCalendar() {
 
   return (
     <div className="space-y-5">
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-5 flex items-center justify-between gap-3">
+      {/* Header card */}
+      <div className="card p-5 flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold text-white">Calendar</h1>
-          <p className="text-sm text-white/70">{label}</p>
+          <h1 className="text-lg font-semibold" style={{ color: "var(--text)" }}>
+            Calendar
+          </h1>
+          <p className="text-sm" style={{ color: "var(--muted)" }}>
+            {label}
+          </p>
         </div>
 
         <div className="flex gap-2">
@@ -78,10 +79,11 @@ export default function PatientCalendar() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-        <div className="grid grid-cols-7 gap-2 text-xs text-white/70 mb-3">
+      {/* Calendar grid card */}
+      <div className="card p-5">
+        <div className="grid grid-cols-7 gap-2 text-xs mb-3">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-            <div key={d} className="px-2">
+            <div key={d} className="px-2" style={{ color: "var(--muted)" }}>
               {d}
             </div>
           ))}
@@ -95,11 +97,16 @@ export default function PatientCalendar() {
                 key={id}
                 type="button"
                 className={[
-                  "h-12 rounded-xl border border-white/10 text-left px-2 py-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
-                  inMonth
-                    ? "bg-white/5 hover:bg-white/10 text-white"
-                    : "bg-white/[0.03] text-white/40",
+                  "h-12 rounded-xl border text-left px-2 py-1 transition focus:outline-none",
+                  "focus-visible:ring-2 focus-visible:ring-offset-0",
+                  inMonth ? "hover:opacity-95" : "opacity-60",
                 ].join(" ")}
+                style={{
+                  borderColor: "var(--border)",
+                  background: "var(--panel)",
+                  color: inMonth ? "var(--text)" : "var(--muted2)",
+                  boxShadow: "none",
+                }}
                 aria-label={`Calendar day ${date.toDateString()}`}
                 title={id}
               >
@@ -109,7 +116,7 @@ export default function PatientCalendar() {
           })}
         </div>
 
-        <p className="mt-4 text-sm text-white/60">
+        <p className="mt-4 text-sm" style={{ color: "var(--muted)" }}>
           Demo calendar UI. Next step is wiring appointment reads from Firestore
           and highlighting booked days.
         </p>

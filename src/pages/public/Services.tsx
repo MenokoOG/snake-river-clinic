@@ -18,7 +18,7 @@ export default function Services() {
         />
       </h2>
 
-      <p className="text-white/80">
+      <p className="">
         <EditableBlock
           value={data.body}
           isAdmin={role === "admin"}
